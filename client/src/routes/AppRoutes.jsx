@@ -23,6 +23,7 @@ import ManageShows from '../pages/admin/ManageShows';
 import AddShow from '../pages/admin/AddShow';
 import ManageTheatres from '../pages/admin/ManageTheatres';
 import AddTheatre from '../pages/admin/AddTheatre';
+import ManageScreens from '../pages/admin/ManageScreens';
 import ManageMovies from '../pages/admin/ManageMovies';
 import AddMovie from '../pages/admin/AddMovie';
 import ManageBookings from '../pages/admin/ManageBookings';
@@ -126,6 +127,14 @@ const AppRoutes = () => {
         element={
           <AdminRoute>
             <AddTheatre />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/screens"
+        element={
+          <AdminRoute>
+            <ManageScreens />
           </AdminRoute>
         }
       />

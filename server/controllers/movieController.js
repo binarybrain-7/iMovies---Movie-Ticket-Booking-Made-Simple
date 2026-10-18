@@ -1,5 +1,6 @@
 const Movie = require('../models/Movie');
 const Show = require('../models/Show');
+const Booking = require('../models/Booking');
 const { ValidationError, NotFoundError } = require('../utils/errors');
 const { sendSuccess } = require('../utils/apiResponse');
 
@@ -206,15 +207,29 @@ const deleteMovie = async (req, res, next) => {
       throw new NotFoundError('Movie not found');
     }
 
-    // Check if there are active bookings or active shows
+    // Check if there are shows for this movie
+    const shows = await Show.find({ movieId }).select('_id');
+    const showIds = shows.map((s) => s._id);
+
+    // Check for existing bookings and active shows
+    const bookingsCount = await Booking.countDocuments({ showId: { $in: showIds } });
     const activeShows = await Show.countDocuments({ movieId, status: 'active' });
-    if (activeShows > 0) {
+
+    if (bookingsCount > 0 || activeShows > 0) {
       // Archive instead of hard delete to preserve show and booking history
       movie.status = 'archived';
       await movie.save();
-      return sendSuccess(res, { movie, archived: true }, 'Movie archived because active shows exist');
+      return sendSuccess(
+        res,
+        { movie, archived: true, bookingsCount, activeShows },
+        `Movie archived to preserve ${bookingsCount} customer booking(s) and show history.`
+      );
     }
 
+    // Safe to delete unused shows and movie
+    if (showIds.length > 0) {
+      await Show.deleteMany({ movieId });
+    }
     await Movie.findByIdAndDelete(movieId);
     return sendSuccess(res, {}, 'Movie deleted successfully');
   } catch (err) {

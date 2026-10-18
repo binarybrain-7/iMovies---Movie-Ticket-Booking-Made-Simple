@@ -17,7 +17,11 @@ export const showService = {
     return await api.post('/shows', showData);
   },
 
-  deleteShow: async (showId) => {
-    return await api.delete(`/shows/${showId}`);
+  updateShow: async (showId, showData) => {
+    return await api.put(`/shows/${showId}`, showData);
+  },
+
+  deleteShow: async (showId, params = {}) => {
+    return await api.delete(`/shows/${showId}`, { params });
   },
 };

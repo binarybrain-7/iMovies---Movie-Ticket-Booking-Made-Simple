@@ -9,6 +9,10 @@ export const theatreService = {
     return await api.get(`/theatres/${theatreId}`);
   },
 
+  getScreensByTheatre: async (theatreId, params = {}) => {
+    return await api.get(`/theatres/${theatreId}/screens`, { params });
+  },
+
   createTheatre: async (theatreData) => {
     return await api.post('/theatres', theatreData);
   },

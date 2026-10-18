@@ -15,6 +15,7 @@ router.post('/:showId/seat-locks', authenticate, seatLockController.createSeatLo
 
 // Admin-only show management
 router.post('/', authenticate, authorizeAdmin, showController.createShow);
+router.put('/:showId', authenticate, authorizeAdmin, showController.updateShow);
 router.patch('/:showId', authenticate, authorizeAdmin, showController.updateShow);
 router.delete('/:showId', authenticate, authorizeAdmin, showController.deleteShow);
 

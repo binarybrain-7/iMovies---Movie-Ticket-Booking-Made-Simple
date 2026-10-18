@@ -1,59 +1,74 @@
 # IMovies — Movie Ticket Booking Made Simple
 
-> **Project Category:** Entertainment / Full-Stack Web Application  
+> **Project Category:** Full-Stack Commercial Cinema Booking Web Platform  
 > **Project Owner:** Aditya Vishwakarma  
-> **Stack:** MERN (MongoDB, Express.js, React.js, Node.js) with Socket.IO & Razorpay
+> **Stack:** MERN (MongoDB, Express.js, React.js 18 / Vite, Node.js v24) with Socket.IO, Multer & Razorpay  
+> **Repository:** [binarybrain-7/iMovies---Movie-Ticket-Booking-Made-Simple](https://github.com/binarybrain-7/iMovies---Movie-Ticket-Booking-Made-Simple)
 
 ---
 
 ## 1. Project Overview
 
-**IMovies** is a full-featured, cinema ticket booking web platform delivering a modern experience. Inspired by the supplied reference designs, the application enables cinema-goers to discover movies, browse theatres, view schedules, select seats in real-time, complete payments, view digital tickets with QR verification, and manage bookings and favorites.
+**IMovies** is a comprehensive, production-ready cinema ticket booking web platform delivering a commercial multiplex booking experience. Inspired by leading platforms such as BookMyShow and Cinepolis, the application enables cinema-goers to discover movies, browse theatres and schedules, select auditorium seats in real-time with live concurrency locking, apply bank discounts, complete payments, view digital tickets with cryptographic QR verification, and track bookings.
 
-The platform includes an **Administration Interface** for managing movies, theatres, screens, show schedules, user accounts, and financial revenue reports.
+The platform includes an **Administration Control Suite** allowing cinema managers to manage movies, theatres, screens, seat tiers, show timings, and financial revenue reports.
 
 ---
 
 ## 2. Key Features
 
-- **Cinematic Visual Design:** Curated dark theme (`#08090D`) with red accents (`#E50914`), custom typography, responsive grid layouts, and working dark/light theme switching.
-- **Authentication & Security:** JWT-based authentication, bcrypt password hashing, input sanitization, rate limiting, and role-based route guards (`USER` vs `ADMIN`).
-- **Real-Time Seat Management:** Interactive auditorium seat map powered by Socket.IO with real-time seat lock and release broadcasting across simultaneous clients.
-- **Concurrency-Safe Seat Locking:** Concurrency-safe, 5-minute temporary reservation engine preventing double bookings.
-- **Automated Price Recalculation:** Subtotal, 18% GST, and convenience fees are computed strictly on the backend to prevent client-side price tampering.
-- **Flexible Payment Integration:** Dedicated payment service supporting live/test **Razorpay** checkout and development **Sandbox Simulation** mode.
-- **Digital Tickets with QR Codes:** Instant digital e-tickets featuring verifiable QR codes and print-to-PDF support.
-- **Booking Management:** Complete booking lifecycle (`PENDING` -> `CONFIRMED` -> `CANCELLED`) with policy-based cancellation rules.
-- **Movie Reviews & Ratings:** User reviews with automatic calculation of aggregate movie ratings.
-- **Favorites & Watchlist:** Private user movie watchlists.
-- **Admin Dashboard:** Real-time telemetry, show schedules, transactions log, user moderation, and revenue breakdown analytics.
+### 🎬 Commercial Cinema Seat Selection (Cinepolis Style)
+- **Authentic Auditorium Geometry:** Custom-designed 184-seat layout matching **Cinepolis Bansal Plaza, Bhopal** across 6 distinct pricing tiers:
+  - **RECLINER: ₹690** (Row L — 11 seats configured in couple pods: `[11, 10]`, `[9, 8]`, `[7, 6]`, `[5, 4]`, `[3, 2]`, `[1]`).
+  - **PREMIUM PLUS: ₹230** (Row K — 15 seats with left, center, and right aisles).
+  - **PREMIUM XL: ₹230** (Row J — 13 seats with designated wheelchair-accessible indicators ♿ on seats 9 & 6).
+  - **PREMIUM: ₹210** (Rows I, H, G, F, E — with electric blue sweet-spot central viewing highlights).
+  - **EXECUTIVE: ₹210** (Rows D, C, B — 15 seats with walkway aisle).
+  - **NORMAL: ₹210** (Row A — 15 seats nearest to screen).
+- **Seat Number Orientation:** Exact cinema numbering descending from left to right as configured.
+- **Auditorium Screen Indicator:** Shallow curved purple cinema screen (`All eyes this way — Cinema Screen`) with upper glow edge facing up towards the audience.
+- **Seat State Styling:** Available (dark squircle with thin border), Selected (vivid purple `#6B5CF6` with glow), Booked (muted dark gray `#18181C`), Reserved / Locked (amber `#78350F`), and Prime viewing (blue outline `#2563EB`).
+- **Interactive Zoom & Pan:** Viewport controls (`Zoom In`, `Zoom Out`, `100% Reset`) for effortless mobile and desktop navigation.
+- **Partner Offers Strip:** Integrated bank discount bar (`[Visa][Axis][Mastercard][RuPay] 40 offers >`) with an interactive modal displaying instant discount codes (e.g., `AXISBOGO`, `VISA20`, `ICICI25`, `RUPAY50`, `PAYTM50`).
+- **Fixed Bottom Booking Panel:** High-contrast mobile-friendly footer displaying selected seat count, live pricing breakdown, and a prominent white `Proceed` button.
+
+### ⚡ Concurrency-Safe Real-Time Seat Locking
+- **Socket.IO Real-Time Sync:** Broadcasts live seat locks, releases, and confirmed bookings across simultaneous clients without page reloads.
+- **5-Minute Temporary Seat Lock:** Atomic, concurrency-safe seat locking engine prevents double bookings and holds seats for 5 minutes during checkout.
+- **Server-Side Price Calculation:** Tickets subtotal, 18% GST, and convenience fees are computed strictly on the backend to prevent client-side price tampering.
+
+### 🖼️ Direct Device Poster Upload Engine
+- **Multer Disk Storage:** High-performance file upload supporting JPG, PNG, WEBP, AVIF, and GIF directly from the user's computer (up to 10MB) into `server/public/uploads/posters/`.
+- **Live Preview Frames:** Instant visual preview with cinema borders before uploading.
+- **Poster Replacement:** Administrators can replace posters directly from movie cards or the creation form.
+- **Pre-configured Cinema Artwork:** Official high-resolution posters configured for *Drishyam: The Conclusion*, *The Raja Saab*, *OG*, *Toxic*, and *Kantara: Chapter 1*.
+
+### 💾 Persistent Local Database Storage
+- **Zero Data Loss:** Configured with MongoDB's `wiredTiger` storage engine persisting directly to disk in `.mongodb_data/`. Movies, custom posters, user accounts, and bookings are permanently retained across server restarts and machine reboots.
+
+### 🛡️ Administration Management Suite
+- **Manage Movies (`/admin/manage-movies`):** Search, genre filtering, status badges, quick edit modal, poster replacement, and deletion guards.
+- **Manage Theatres (`/admin/manage-theatres`):** Create and edit theatres, location details, active status toggles.
+- **Manage Screens (`/admin/manage-screens`):** Screen creation, tier pricing configuration, live seat layout preview, and safe deletion.
+- **Manage Shows (`/admin/manage-shows`):** Multi-theatre show scheduling with automated conflict detection (preventing overlapping showtimes on the same screen).
+- **Admin Dashboard (`/admin/dashboard`):** Real-time analytics, revenue reports, total bookings counter, and active shows telemetry.
+
+### 💳 Payments & Digital Tickets
+- **Flexible Payment Gateway:** Dual-mode payment processing supporting **Razorpay** checkout and development **Sandbox Simulation**.
+- **Digital Tickets with QR Codes:** Instant digital tickets with verifiable QR verification tokens, printable to PDF.
+- **Ticket Verification Portal (`/verify-ticket`):** Real-time scanner / lookup for cinema ushers to validate entry.
 
 ---
 
 ## 3. Technology Stack
 
-### Frontend
-- **Framework:** React.js (Vite)
-- **Routing:** React Router DOM (v7)
-- **Icons & UI:** React Icons, Bootstrap 5, React Toastify
-- **QR Code:** `qrcode.react`
-- **Real-Time:** `socket.io-client`
-- **HTTP Client:** Axios (Centralized API client)
-- **Effects:** Canvas Confetti
-
-### Backend
-- **Runtime:** Node.js (v24+)
-- **Framework:** Express.js (MVC Pattern)
-- **Database ODM:** Mongoose (v8+)
-- **Authentication:** JSON Web Tokens (JWT) & bcryptjs
-- **Security:** Helmet, CORS, Express Rate Limit, Express Validator
-- **Real-Time:** Socket.IO
-- **Logging:** Structured Morgan & Custom Logger
-- **Notifications:** Nodemailer (SMTP with safe development fallback)
-- **Testing:** Node.js built-in test runner (`node:test`) & Supertest
-
-### Database
-- **MongoDB:** Compatible with MongoDB local instance (`mongodb://127.0.0.1:27017/imovies`), MongoDB Atlas, or automated development `mongodb-memory-server` out-of-the-box.
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 18, Vite 8, React Router v7, React Icons, Bootstrap 5 + Vanilla CSS, React Toastify, `qrcode.react`, Canvas Confetti |
+| **Backend** | Node.js (v24), Express.js (MVC Pattern), Socket.IO, Multer (File Uploads) |
+| **Database** | MongoDB / Mongoose v8 with persistent `wiredTiger` disk storage (`.mongodb_data/`) |
+| **Authentication** | JWT (JSON Web Tokens), bcryptjs password hashing, role-based route guards (`USER` / `ADMIN`) |
+| **Testing** | Node.js native test runner (`node --test`), Supertest integration suite |
 
 ---
 
@@ -63,80 +78,74 @@ The platform includes an **Administration Interface** for managing movies, theat
 IMovies/
 |-- client/
 |   |-- public/
+|   |   |-- posters/             # Static cinema movie posters
 |   |   |-- favicon.svg
 |   |-- src/
 |   |   |-- components/
-|   |   |   |-- common/          # LoadingSpinner, Confirmation modals
+|   |   |   |-- admin/           # Admin header, navigation tabs
+|   |   |   |-- common/          # LoadingSpinner, ConfirmModal
 |   |   |   |-- layout/          # Navbar, Footer
 |   |   |   |-- movies/          # MovieCard
-|   |   |   |-- seats/           # SeatMap with live sockets
+|   |   |   |-- seats/           # SeatMap (Cinepolis 184-seat auditorium)
 |   |   |   |-- booking/         # DigitalTicket with QR code
 |   |   |-- pages/
-|   |   |   |-- Home.jsx         # Landing page (Screenshot 1)
-|   |   |   |-- Movies.jsx       # Catalogue (Screenshot 4 & 5)
-|   |   |   |-- MovieDetails.jsx # Movie details & reviews
-|   |   |   |-- Login.jsx        # Login page (Screenshot 2)
-|   |   |   |-- Register.jsx     # Registration page (Screenshot 1)
+|   |   |   |-- Home.jsx         # Cinema landing page
+|   |   |   |-- Movies.jsx       # Movie catalogue & filters
+|   |   |   |-- MovieDetails.jsx # Movie info, cast, and reviews
 |   |   |   |-- SelectShow.jsx   # Date & showtimes picker
-|   |   |   |-- SeatSelection.jsx# Auditorium seat map & lock
-|   |   |   |-- Payment.jsx      # Payment order & checkout simulation
+|   |   |   |-- SeatSelection.jsx# Cinepolis seat selection & offers
+|   |   |   |-- Payment.jsx      # Payment order & checkout
 |   |   |   |-- BookingConfirmation.jsx # Confirmed ticket view
-|   |   |   |-- MyBookings.jsx   # User orders (Screenshot 5)
+|   |   |   |-- MyBookings.jsx   # Customer booking history
 |   |   |   |-- Favorites.jsx    # User watchlist
-|   |   |   |-- Profile.jsx      # Account & stats
 |   |   |   |-- TicketVerification.jsx # QR admission validation
-|   |   |   |-- NotFound.jsx     # 404 page
 |   |   |-- pages/admin/
-|   |   |   |-- AdminDashboard.jsx # Admin dashboard (Screenshot 2)
-|   |   |   |-- ManageMovies.jsx   # Available movies list (Screenshot 4)
-|   |   |   |-- AddMovie.jsx       # Add movie (Screenshot 4)
-|   |   |   |-- ManageTheatres.jsx # Theatres management
-|   |   |   |-- AddTheatre.jsx     # Add theatre (Screenshot 3)
-|   |   |   |-- ManageShows.jsx    # Shows management
-|   |   |   |-- AddShow.jsx        # Add show (Screenshot 3)
-|   |   |   |-- ManageBookings.jsx # All bookings transaction table
-|   |   |   |-- ManageUsers.jsx    # User accounts
+|   |   |   |-- AdminDashboard.jsx # Telemetry & analytics
+|   |   |   |-- ManageMovies.jsx   # Movie management & poster replacement
+|   |   |   |-- AddMovie.jsx       # Create movie with device poster upload
+|   |   |   |-- ManageTheatres.jsx # Theatre management
+|   |   |   |-- ManageScreens.jsx  # Screen & seat tier configuration
+|   |   |   |-- ManageShows.jsx    # Show schedule & conflict detection
+|   |   |   |-- ManageBookings.jsx # Financial bookings table
 |   |   |   |-- RevenueReports.jsx # Revenue analytics
-|   |   |-- context/               # AuthContext, BookingContext, ThemeContext
-|   |   |-- services/              # Centralized Axios API services
-|   |   |-- routes/                # ProtectedRoute, AdminRoute, AppRoutes
-|   |   |-- styles/                # global.css, theme.css
+|   |   |-- context/             # AuthContext, BookingContext, ThemeContext
+|   |   |-- services/            # Axios API services (movie, show, screen, booking, etc.)
+|   |   |-- styles/              # global.css, theme.css
 |   |   |-- App.jsx
 |   |   |-- main.jsx
 |   |-- package.json
 |   |-- vite.config.js
 |
 |-- server/
-|   |-- config/          # database.js, payment.js
-|   |-- models/          # User, Movie, Theatre, Screen, Show, SeatLock, Booking, Payment, Review, Favorite, Notification
-|   |-- controllers/     # auth, user, movie, theatre, show, booking, payment, admin...
+|   |-- config/          # database.js (persistent disk engine), payment.js
+|   |-- models/          # Movie, Show, Screen, Theatre, SeatLock, Booking, User, Payment
+|   |-- controllers/     # movie, show, screen, theatre, booking, payment, admin controllers
 |   |-- routes/          # RESTful routes under /api/v1
-|   |-- services/        # bookingService, seatLockService, paymentService, socketService, emailService
-|   |-- middleware/      # authenticate, authorizeAdmin, errorHandler, rateLimiter, validate
-|   |-- scripts/         # seed.js, createAdmin.js, autoSeed.js
-|   |-- tests/           # api.test.js
-|   |-- package.json
+|   |-- middleware/      # authenticate, authorizeAdmin, upload (Multer), errorHandler, rateLimiter
+|   |-- services/        # seatLockService, bookingService, paymentService, socketService
+|   |-- public/
+|   |   |-- uploads/     # Device uploaded posters directory
+|   |-- scripts/         # autoSeed.js, updatePosters.js, createAdmin.js
+|   |-- tests/           # api.test.js (30 automated integration tests)
 |   |-- server.js
+|   |-- package.json
 |
-|-- docs/
-|   |-- architecture.md
-|   |-- er-diagram.md
-|   |-- api-documentation.md
-|   |-- user-flow.md
+|-- .mongodb_data/       # Persistent database files (WiredTiger engine)
 |-- README.md
 ```
 
 ---
 
-## 5. Getting Started & Installation
+## 5. Getting Started & Setup
 
 ### Prerequisites
 - **Node.js:** v18.0.0 or later (v24 recommended)
 - **npm:** v9.0.0 or later
 
-### Step 1: Clone or Open the Workspace
+### Step 1: Clone the Repository
 ```bash
-cd "IMovies - Movie ticket booking made simple"
+git clone https://github.com/binarybrain-7/iMovies---Movie-Ticket-Booking-Made-Simple.git
+cd iMovies---Movie-Ticket-Booking-Made-Simple
 ```
 
 ### Step 2: Install Dependencies
@@ -155,7 +164,6 @@ npm install
 ## 6. Environment Configuration
 
 ### Backend (`server/.env`)
-Copy `server/.env.example` to `server/.env`:
 ```env
 PORT=8000
 NODE_ENV=development
@@ -164,23 +172,19 @@ JWT_SECRET=super_secret_imovies_jwt_token_key_change_in_production_987654321
 CLIENT_URL=http://localhost:5173
 API_BASE_URL=http://localhost:8000/api/v1
 
-# Payment Configuration
-# Set to 'sandbox' for development simulation or 'razorpay' for live credentials
+# Payment Configuration (Sandbox simulation enabled by default for demo)
 PAYMENT_PROVIDER=sandbox
 RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
 RAZORPAY_WEBHOOK_SECRET=
 
-# Optional SMTP
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-EMAIL_FROM="IMovies" <tickets@imovies.app>
+# Admin initial credentials
+ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@imovies.com
+ADMIN_PASSWORD=Admin@123456
 ```
 
 ### Frontend (`client/.env`)
-Copy `client/.env.example` to `client/.env`:
 ```env
 VITE_API_BASE_URL=http://localhost:8000/api/v1
 VITE_SOCKET_URL=http://localhost:8000
@@ -190,16 +194,30 @@ VITE_RAZORPAY_KEY_ID=
 
 ---
 
-## 7. Database Initialization & Seeding
+## 7. Running the Application
 
-The application automatically initializes sample demo data on first start if the database is empty! Alternatively, you can seed manually:
-
+### 1. Launch Backend Server
 ```bash
 cd server
-npm run seed
+npm run dev
+# Server running at: http://localhost:8000
+# Health check: http://localhost:8000/api/v1/health
 ```
 
-### Default Demo Accounts
+### 2. Launch Frontend Client
+In a separate terminal:
+```bash
+cd client
+npm run dev
+# Vite client running at: http://localhost:5173
+```
+
+Open your browser at **[http://localhost:5173](http://localhost:5173)**.
+
+---
+
+## 8. Default Credentials
+
 | Role | Email | Password |
 |---|---|---|
 | **Administrator** | `admin@imovies.com` | `Admin@123456` |
@@ -208,69 +226,31 @@ npm run seed
 
 ---
 
-## 8. Running the Application
-
-### Start Backend Server
-```bash
-cd server
-npm run dev
-# Server runs on: http://localhost:8000
-# Health check: http://localhost:8000/api/v1/health
-```
-
-### Start Frontend Application
-In a separate terminal:
-```bash
-cd client
-npm run dev
-# Client runs on: http://localhost:5173
-```
-
-Open your browser to [http://localhost:5173](http://localhost:5173).
-
----
-
 ## 9. Automated Testing
 
-The backend includes an automated integration test suite validating:
-- Health check
-- User registration and duplicate rejection
-- Invalid login rejection and successful login
+The backend includes a comprehensive automated test suite (`api.test.js`) validating:
+- Health checks & system telemetry
+- Customer registration & duplicate validation
 - Role-based authorization (`USER` vs `ADMIN`)
-- Movie catalogue search and filtering
-- Show schedules and real-time seat availability
-- Concurrency-safe seat locks and conflict rejection
-- Pending booking calculation (subtotal + GST + fee)
-- Payment order creation and simulation verification
+- Movie catalogue search & genre filters
+- Real-time seat availability maps (184-seat Cinepolis auditorium)
+- Concurrency-safe seat locks (5-minute TTL) & conflict rejections
+- Server-side subtotal, GST (18%), and fee calculations
+- Sandbox payment order creation & verification
 - Digital ticket cryptographic verification
+- Admin Screen Management (Create screen, update screen, fetch screens)
+- Show schedule conflict detection (overlapping slot rejection)
 
 To execute all tests:
 ```bash
 cd server
 npm test
 ```
+All **30 integration tests** pass cleanly with zero failures.
 
 ---
 
-## 10. Security Notes
+## 10. License & Author
 
-1. **No Plaintext Passwords:** Passwords are salted and hashed using `bcryptjs` with 10 rounds.
-2. **No Secret Leaks:** Frontend variables use only `VITE_` public identifiers. Private API keys and JWT secrets are restricted to the server environment.
-3. **Server-Side Validation:** All seat availability, prices, GST, convenience fees, and payment signatures are computed on the server.
-4. **Idempotent Confirmation:** Duplicate payment callbacks or browser retries will not duplicate bookings.
-5. **Rate Limiting:** Protects `/api/v1/auth` endpoints from brute-force login attacks.
-
----
-
-## 11. Known Limitations & Production Enhancements
-
-- **Email Delivery:** SMTP email delivery requires valid credentials. If SMTP is omitted, confirmation emails are safely logged without throwing errors.
-- **Payment Gateway:** If Razorpay credentials are not provided, the application runs in sandbox simulation mode. Real payments require setting `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`.
-- **MongoDB Transactions:** Concurrency safety uses atomic MongoDB operations. Multi-document transactions require a replica set deployment (such as MongoDB Atlas).
-
----
-
-## 12. License & Author
-
-- **Developed by:** Aditya Vishwakarma
-- **Project:** IMovies — Movie Ticket Booking Made Simple
+- **Author:** Aditya Vishwakarma  
+- **Project:** [iMovies — Movie Ticket Booking Made Simple](https://github.com/binarybrain-7/iMovies---Movie-Ticket-Booking-Made-Simple)  

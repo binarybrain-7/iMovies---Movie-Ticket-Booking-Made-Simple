@@ -17,6 +17,7 @@ router.post('/:movieId/reviews', authenticate, reviewController.createOrUpdateRe
 // Admin-only management routes
 router.post('/upload-poster', authenticate, authorizeAdmin, uploadPoster.single('poster'), movieController.uploadPosterImage);
 router.post('/', authenticate, authorizeAdmin, movieController.createMovie);
+router.put('/:movieId', authenticate, authorizeAdmin, movieController.updateMovie);
 router.patch('/:movieId', authenticate, authorizeAdmin, movieController.updateMovie);
 router.delete('/:movieId', authenticate, authorizeAdmin, movieController.deleteMovie);
 

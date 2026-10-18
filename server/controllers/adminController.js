@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Movie = require('../models/Movie');
 const Theatre = require('../models/Theatre');
+const Screen = require('../models/Screen');
 const Show = require('../models/Show');
 const Booking = require('../models/Booking');
 const Payment = require('../models/Payment');
@@ -18,6 +19,7 @@ const getDashboardStats = async (req, res, next) => {
       totalUsers,
       totalMovies,
       activeTheatres,
+      totalScreens,
       upcomingShows,
       totalBookings,
       confirmedBookings,
@@ -29,6 +31,7 @@ const getDashboardStats = async (req, res, next) => {
       User.countDocuments({ role: 'USER' }),
       Movie.countDocuments(),
       Theatre.countDocuments({ isActive: true }),
+      Screen.countDocuments({ isActive: true }),
       Show.countDocuments({ status: 'active' }),
       Booking.countDocuments(),
       Booking.countDocuments({ status: 'CONFIRMED' }),
@@ -74,6 +77,7 @@ const getDashboardStats = async (req, res, next) => {
         totalUsers,
         totalMovies,
         activeTheatres,
+        totalScreens,
         upcomingShows,
         totalBookings,
         confirmedBookings,

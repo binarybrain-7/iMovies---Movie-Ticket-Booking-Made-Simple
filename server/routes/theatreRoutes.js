@@ -15,6 +15,7 @@ router.post('/:theatreId/screens', authenticate, authorizeAdmin, screenControlle
 
 // Admin-only theatre management
 router.post('/', authenticate, authorizeAdmin, theatreController.createTheatre);
+router.put('/:theatreId', authenticate, authorizeAdmin, theatreController.updateTheatre);
 router.patch('/:theatreId', authenticate, authorizeAdmin, theatreController.updateTheatre);
 router.delete('/:theatreId', authenticate, authorizeAdmin, theatreController.deleteTheatre);
 

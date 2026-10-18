@@ -1,6 +1,7 @@
 const Theatre = require('../models/Theatre');
 const Screen = require('../models/Screen');
 const Show = require('../models/Show');
+const Booking = require('../models/Booking');
 const { ValidationError, NotFoundError } = require('../utils/errors');
 const { sendSuccess } = require('../utils/apiResponse');
 
@@ -12,7 +13,7 @@ const getAllTheatres = async (req, res, next) => {
     const { city, search, activeOnly = 'true' } = req.query;
     const query = {};
 
-    if (activeOnly === 'true') {
+    if (activeOnly === 'true' || activeOnly === true) {
       query.isActive = true;
     }
 
@@ -146,15 +147,34 @@ const updateTheatre = async (req, res, next) => {
 const deleteTheatre = async (req, res, next) => {
   try {
     const { theatreId } = req.params;
+    const theatre = await Theatre.findById(theatreId);
+    if (!theatre) {
+      throw new NotFoundError('Theatre not found');
+    }
+
+    const shows = await Show.find({ theatreId }).select('_id');
+    const showIds = shows.map((s) => s._id);
+
+    const bookingsCount = await Booking.countDocuments({ showId: { $in: showIds } });
     const activeShows = await Show.countDocuments({ theatreId, status: 'active' });
-    if (activeShows > 0) {
-      await Theatre.findByIdAndUpdate(theatreId, { isActive: false });
-      return sendSuccess(res, {}, 'Theatre deactivated due to active shows');
+
+    if (bookingsCount > 0 || activeShows > 0) {
+      theatre.isActive = false;
+      await theatre.save();
+      await Screen.updateMany({ theatreId }, { isActive: false });
+      return sendSuccess(
+        res,
+        { theatre, deactivated: true, bookingsCount, activeShows },
+        `Theatre deactivated to preserve ${bookingsCount} customer booking(s) and historical show records.`
+      );
     }
 
     await Theatre.findByIdAndDelete(theatreId);
     await Screen.deleteMany({ theatreId });
-    return sendSuccess(res, {}, 'Theatre and associated screens deleted');
+    if (showIds.length > 0) {
+      await Show.deleteMany({ theatreId });
+    }
+    return sendSuccess(res, {}, 'Theatre and associated screens deleted successfully');
   } catch (err) {
     next(err);
   }

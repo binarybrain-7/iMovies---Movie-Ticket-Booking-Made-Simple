@@ -13,6 +13,7 @@ import {
   FiPlusCircle,
   FiClock,
   FiSearch,
+  FiMonitor,
 } from 'react-icons/fi';
 import { FaTheaterMasks } from 'react-icons/fa';
 
@@ -178,6 +179,20 @@ const Navbar = () => {
                     >
                       + Add Show
                     </Link>
+                    <Link
+                      to="/admin/manage-movies"
+                      className="dropdown-item px-3 py-2 text-decoration-none d-block"
+                      style={{ color: 'var(--color-text)', fontSize: '0.875rem' }}
+                    >
+                      Manage Movies
+                    </Link>
+                    <Link
+                      to="/admin/screens"
+                      className="dropdown-item px-3 py-2 text-decoration-none d-block"
+                      style={{ color: 'var(--color-text)', fontSize: '0.875rem' }}
+                    >
+                      Manage Screens
+                    </Link>
                     <div className="dropdown-divider my-1" style={{ borderColor: 'var(--color-border)' }} />
                     <Link
                       to="/admin/revenue"
@@ -204,6 +219,22 @@ const Navbar = () => {
                 aria-label="Manage Theatres"
               >
                 <FaTheaterMasks />
+              </Link>
+
+              {/* Manage Screens */}
+              <Link
+                to="/admin/screens"
+                className="btn btn-link p-1 text-decoration-none"
+                style={{
+                  color: location.pathname.startsWith('/admin/screens')
+                    ? 'var(--color-primary)'
+                    : 'var(--color-text)',
+                  fontSize: '1.25rem',
+                }}
+                title="Manage Screens"
+                aria-label="Manage Screens"
+              >
+                <FiMonitor />
               </Link>
 
               {/* Manage Bookings */}

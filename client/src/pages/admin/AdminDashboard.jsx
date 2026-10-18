@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { adminService } from '../../services/adminService';
 import { showService } from '../../services/showService';
+import AdminShowCard from '../../components/admin/AdminShowCard';
+import EditShowModal from '../../components/admin/EditShowModal';
+import ShowDetailsModal from '../../components/admin/ShowDetailsModal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { toast } from 'react-toastify';
 import {
@@ -12,6 +16,7 @@ import {
   FiPlus,
   FiTrash2,
   FiTrendingUp,
+  FiMonitor,
 } from 'react-icons/fi';
 import { FaTheaterMasks } from 'react-icons/fa';
 
@@ -20,7 +25,13 @@ const AdminDashboard = () => {
   const [recentShows, setRecentShows] = useState([]);
   const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [deletingShowId, setDeletingShowId] = useState('');
+
+  // Show management modals
+  const [editShowModalOpen, setEditShowModalOpen] = useState(false);
+  const [detailsShowModalOpen, setDetailsShowModalOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [selectedShow, setSelectedShow] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
@@ -41,29 +52,70 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const handleDeleteShow = async (showId, movieTitle) => {
-    if (!window.confirm(`Are you sure you want to cancel the show for "${movieTitle}"?`)) return;
+  const handleOpenEditShow = (show) => {
+    setSelectedShow(show);
+    setEditShowModalOpen(true);
+  };
+
+  const handleOpenDetailsShow = (show) => {
+    setSelectedShow(show);
+    setDetailsShowModalOpen(true);
+  };
+
+  const handleOpenDeleteShow = (show) => {
+    setSelectedShow(show);
+    setConfirmDeleteOpen(true);
+  };
+
+  const handleConfirmDeleteShow = async () => {
+    if (!selectedShow) return;
 
     try {
-      setDeletingShowId(showId);
-      await showService.deleteShow(showId);
-      toast.success('Show cancelled successfully');
-      setRecentShows((prev) => prev.filter((s) => s._id !== showId));
+      setDeleting(true);
+      const res = await showService.deleteShow(selectedShow._id);
+
+      if (res.data?.cancelled) {
+        toast.info(res.message || 'Show cancelled. Existing customer booking records were preserved.');
+        setRecentShows((prev) =>
+          prev.map((s) => (s._id === selectedShow._id ? { ...s, status: 'cancelled' } : s))
+        );
+      } else {
+        toast.success('Show deleted successfully');
+        setRecentShows((prev) => prev.filter((s) => s._id !== selectedShow._id));
+      }
+
+      setConfirmDeleteOpen(false);
+      // Soft refresh stats in background
+      adminService.getDashboard().then((r) => setStats(r.data.stats)).catch(() => {});
     } catch (err) {
+      console.error('Failed to delete/cancel show:', err);
       toast.error(err.message || 'Failed to cancel show');
     } finally {
-      setDeletingShowId('');
+      setDeleting(false);
     }
+  };
+
+  const handleShowSaved = (updatedShow) => {
+    // Update local state immediately without full page reload
+    setRecentShows((prev) =>
+      prev.map((s) => (s._id === updatedShow._id ? updatedShow : s))
+    );
+    // Soft refresh stats in background
+    adminService.getDashboard().then((r) => setStats(r.data.stats)).catch(() => {});
   };
 
   if (loading) {
     return <LoadingSpinner message="Loading administration telemetry..." />;
   }
 
+  const deleteItemName = selectedShow
+    ? `Show for "${selectedShow.movieId?.title || 'Movie'}" at ${selectedShow.theatreId?.name || 'Theatre'} on ${selectedShow.showDate} at ${selectedShow.startTime}`
+    : '';
+
   return (
     <div className="admin-dashboard-page container py-4">
       {/* KPI Stats Overview Cards */}
-      <div className="row g-3 mb-5">
+      <div className="row g-3 mb-4">
         <div className="col-6 col-md-3">
           <div className="cinema-card p-3">
             <div className="d-flex align-items-center justify-content-between mb-2">
@@ -107,6 +159,15 @@ const AdminDashboard = () => {
 
       {/* QUICK ACTIONS ROW */}
       <div className="d-flex flex-wrap gap-2 mb-4 justify-content-end">
+        <Link to="/admin/manage-movies" className="btn btn-cinema-secondary btn-sm d-flex align-items-center gap-1">
+          <FiFilm /> Manage Movies
+        </Link>
+        <Link to="/admin/theatres" className="btn btn-cinema-secondary btn-sm d-flex align-items-center gap-1">
+          <FaTheaterMasks /> Manage Theatres
+        </Link>
+        <Link to="/admin/screens" className="btn btn-cinema-secondary btn-sm d-flex align-items-center gap-1">
+          <FiMonitor /> Manage Screens
+        </Link>
         <Link to="/admin/add-movie" className="btn btn-cinema btn-sm d-flex align-items-center gap-1">
           <FiPlus /> Add Movie
         </Link>
@@ -121,11 +182,16 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      {/* ADMIN SHOWS SECTION (SCREENSHOT 2) */}
+      {/* ADMIN SHOWS SECTION */}
       <section className="mb-5">
-        <h2 className="section-title text-start mb-4">
-          Admin <span className="text-accent">Shows</span>
-        </h2>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h2 className="section-title text-start mb-0">
+            Admin <span className="text-accent">Shows</span>
+          </h2>
+          <Link to="/admin/shows" className="btn btn-cinema-secondary btn-sm">
+            View All Shows
+          </Link>
+        </div>
 
         {recentShows.length === 0 ? (
           <div className="cinema-card text-center py-4">
@@ -138,58 +204,19 @@ const AdminDashboard = () => {
           <div className="row g-3">
             {recentShows.map((show) => (
               <div key={show._id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-                {/* Show card matching Screenshot 2:
-                    Movie: Og
-                    Theatre: Srinivasa
-                    Showdate: Sep 25, 2025
-                    Showtime: 2:00 PM
-                    Delete button with red outline and trash icon
-                */}
-                <div
-                  className="cinema-card p-3 d-flex flex-column h-100"
-                  style={{
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                  }}
-                >
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    <FiFilm className="text-danger flex-shrink-0" />
-                    <span className="small text-muted">Movie: </span>
-                    <strong className="text-truncate" title={show.movieId?.title}>
-                      {show.movieId?.title || 'Unknown'}
-                    </strong>
-                  </div>
-
-                  <div className="small text-muted mb-1 ps-4">
-                    Theatre: <span style={{ color: 'var(--color-text)' }}>{show.theatreId?.name}</span>
-                  </div>
-
-                  <div className="small text-muted mb-1 ps-4">
-                    Showdate: <span style={{ color: 'var(--color-text)' }}>{show.showDate}</span>
-                  </div>
-
-                  <div className="small text-muted mb-3 ps-4">
-                    Showtime: <span style={{ color: 'var(--color-text)' }}>{show.startTime}</span>
-                  </div>
-
-                  <div className="mt-auto">
-                    <button
-                      onClick={() => handleDeleteShow(show._id, show.movieId?.title)}
-                      disabled={deletingShowId === show._id}
-                      className="btn btn-cinema-danger w-100 d-flex align-items-center justify-content-center"
-                      title="Cancel Show"
-                    >
-                      <FiTrash2 size={16} />
-                    </button>
-                  </div>
-                </div>
+                <AdminShowCard
+                  show={show}
+                  onViewDetails={handleOpenDetailsShow}
+                  onEdit={handleOpenEditShow}
+                  onDelete={handleOpenDeleteShow}
+                />
               </div>
             ))}
           </div>
         )}
       </section>
 
-      {/* ALL BOOKINGS SECTION (SCREENSHOT 2) */}
+      {/* ALL BOOKINGS SECTION */}
       <section>
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="section-title text-start mb-0">
@@ -248,6 +275,38 @@ const AdminDashboard = () => {
           </div>
         )}
       </section>
+
+      {/* Edit Show Modal */}
+      <EditShowModal
+        isOpen={editShowModalOpen}
+        show={selectedShow}
+        onClose={() => setEditShowModalOpen(false)}
+        onSaved={handleShowSaved}
+      />
+
+      {/* Show Details Modal */}
+      <ShowDetailsModal
+        isOpen={detailsShowModalOpen}
+        show={selectedShow}
+        onClose={() => setDetailsShowModalOpen(false)}
+        onOpenEdit={(s) => {
+          setSelectedShow(s);
+          setEditShowModalOpen(true);
+        }}
+      />
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={confirmDeleteOpen}
+        title="Delete / Cancel Show"
+        message="Are you sure you want to delete this show schedule?"
+        itemName={deleteItemName}
+        warningText="If this show has existing customer bookings, it will be safely cancelled without erasing customer tickets or financial transaction history."
+        confirmButtonText="Confirm Delete"
+        loading={deleting}
+        onConfirm={handleConfirmDeleteShow}
+        onClose={() => setConfirmDeleteOpen(false)}
+      />
     </div>
   );
 };
